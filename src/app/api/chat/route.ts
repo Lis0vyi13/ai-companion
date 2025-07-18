@@ -17,8 +17,9 @@ export async function POST(req: NextRequest) {
     const reply = completion.choices?.[0]?.message?.content ?? "";
 
     return NextResponse.json({ reply });
-  } catch (error: unknown) {
-    console.error("Groq API error:", error);
-    return NextResponse.json({ error: "Groq API error", details: error?.message }, { status: 500 });
+  } catch (err) {
+    const error =
+      typeof err === "object" && err && "message" in err ? err : { message: "Unknown error" };
+    return NextResponse.json({ error: "Groq API error", details: error }, { status: 500 });
   }
 }

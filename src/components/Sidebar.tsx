@@ -3,7 +3,7 @@ import { Plus } from "lucide-react";
 const Sidebar = () => {
   return (
     <div className="w-[5.5rem] h-full relative overflow-hidden">
-      <div className="absolute inset-0 z-0 bg-menu/80" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#fefefe] to-[#e8eaf9]" />
 
       <div className="relative h-full flex flex-col items-center justify-between text-black p-4 font-medium">
         <div className="relative logo cursor-pointer">

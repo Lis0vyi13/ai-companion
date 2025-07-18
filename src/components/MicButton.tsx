@@ -46,7 +46,6 @@ interface ExtendedWindow extends Window {
 
 export default function MicButton({ onTranscript }: MicButtonProps) {
   const [listening, setListening] = useState<boolean>(false);
-  const [partialTranscript, setPartialTranscript] = useState<string>("");
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
@@ -65,7 +64,7 @@ export default function MicButton({ onTranscript }: MicButtonProps) {
       }
 
       const recognition: SpeechRecognition = new SpeechRecognitionAPI();
-      recognition.lang = navigator.language || "en-US"; // автоматично, але на 1 мову
+      recognition.lang = navigator.language || "en-US";
       recognition.continuous = false;
       recognition.interimResults = true;
 
@@ -75,16 +74,12 @@ export default function MicButton({ onTranscript }: MicButtonProps) {
 
         if (result.isFinal) {
           onTranscript(transcript);
-          setPartialTranscript("");
-        } else {
-          setPartialTranscript(transcript); // показати в реальному часі
         }
       };
 
       recognition.onend = () => {
         stopBeep();
         setListening(false);
-        setPartialTranscript(""); // обнулити при завершенні
       };
 
       recognitionRef.current = recognition;
@@ -112,19 +107,12 @@ export default function MicButton({ onTranscript }: MicButtonProps) {
     <div className="flex flex-col items-center">
       <button
         onClick={toggleRecording}
-        className={`mt-4 flex items-center cursor-pointer gap-2 px-6 py-3 rounded-full text-white text-sm font-semibold transition ${
+        className={`flex items-center cursor-pointer gap-2 px-3 py-3 rounded-full text-white text-sm font-semibold transition ${
           listening ? "bg-red-600" : "bg-blue-600 hover:bg-blue-700"
         }`}
       >
         {listening ? <MicOff size={18} /> : <Mic size={18} />}
-        {listening ? "Зупинити запис" : "Говорити"}
       </button>
-
-      {listening && partialTranscript && (
-        <div className="mt-2 text-gray-300 text-sm italic animate-pulse">
-          {partialTranscript}...
-        </div>
-      )}
     </div>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/utils/cn";
 import Icon from "./Icon";
+import { cn } from "@/lib/utils";
 
 export interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   onSend?: (text: string) => void;
@@ -25,13 +25,13 @@ export default function Input({
   const [value, setValue] = useState("");
 
   const baseInputStyles = cn(
-    "w-full px-4 py-2.5 text-sm rounded-xl bg-primary text-secondary outline-none shadow-sm focus:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition",
+    "w-full px-4 py-2.5 text-sm bg-primary/50 rounded-xl text-secondary outline-none shadow-sm focus:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition",
     props.className,
   );
 
   const paddingStyles = cn({
-    "pl-[52px]": iconBefore,
-    "pr-12": iconAfter,
+    "pl-[3.2rem]": iconBefore,
+    "pr-[3.2rem]": iconAfter,
     "pl-4": !iconBefore,
     "pr-4": !iconAfter,
   });

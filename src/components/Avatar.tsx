@@ -1,87 +1,148 @@
 "use client";
 
-import { useAgentStore } from "@/store";
-import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useDIDStream } from "@/hooks/useDIDStream";
 
-export default function Avatar() {
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [error, setError] = useState("");
+export interface StreamParams {
+  offer: RTCSessionDescriptionInit;
+  id: string;
+  ice_servers: RTCIceServer[];
+  session_id: string;
+}
 
-  const avatarText = useAgentStore((state) => state.avatarText);
+export const StreamPlayer = ({ streamData }: { streamData: StreamParams }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const remoteStream = useDIDStream({
+    offer: streamData?.offer,
+    id: streamData?.id,
+    ice_servers: streamData?.ice_servers,
+    session_id: streamData?.session_id,
+  });
 
   useEffect(() => {
-    if (avatarText.length === 0) return;
+    const video = videoRef.current;
+    if (!remoteStream || !video) return;
 
-    const generateAvatar = async () => {
-      setVideoUrl(null);
-      setError("");
+    if (video.srcObject !== remoteStream) {
+      video.srcObject = remoteStream;
+    }
 
+    const playVideo = async () => {
       try {
-        const res = await fetch("/api/create-talk", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: avatarText }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok || !data.id) {
-          throw new Error(data?.error?.message || "Не удалось создать видео.");
-        }
-
-        const talkId = data.id;
-        console.log("Talk ID:", talkId);
-
-        let attempts = 0;
-        const maxAttempts = 30;
-        const pollInterval = 1000;
-
-        while (attempts < maxAttempts) {
-          const statusRes = await fetch(`/api/get-talk?id=${talkId}`);
-          const statusData = await statusRes.json();
-
-          if (!statusRes.ok) {
-            throw new Error(statusData?.error?.message || "Ошибка при получении статуса.");
-          }
-
-          if (statusData.status === "done" && statusData.result_url) {
-            setVideoUrl(statusData.result_url);
-            break;
-          }
-
-          await new Promise((resolve) => setTimeout(resolve, pollInterval));
-          attempts++;
-        }
-
-        if (attempts >= maxAttempts) {
-          throw new Error("Таймаут ожидания генерации видео.");
-        }
+        await video.play();
       } catch (err) {
-        const error =
-          typeof err === "object" && err && "message" in err
-            ? (err.message as string)
-            : "Unknown error";
-
-        setError(error);
+        console.error("Error playing video:", err);
       }
     };
 
-    generateAvatar();
-  }, [avatarText]);
+    if (video.readyState >= 2) {
+      playVideo();
+    } else {
+      video.onloadedmetadata = playVideo;
+    }
+
+    return () => {
+      video.pause();
+    };
+  }, [remoteStream]);
+
+  if (!streamData) return null;
 
   return (
-    <div className="space-y-4 max-w-md mx-auto p-4 text-center">
-      {error && <p className="text-red-500">{error}</p>}
-      {videoUrl ? (
-        <video src={videoUrl} controls autoPlay className="w-full rounded shadow-md" />
-      ) : (
-        <Image
-          src="https://d-id-public-bucket.s3.us-west-2.amazonaws.com/alice.jpg"
-          alt="Agent avatar"
-          className="w-[220px] h-[220px] rounded-full mx-auto object-cover shadow"
-        />
-      )}
+    <div className="mt-4 w-[300px] h-[300px] relative">
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        loop
+        muted
+        onError={(e) => console.error("Video error:", e)}
+        className="rounded shadow object-cover w-full h-full"
+      />
+    </div>
+  );
+};
+export default function DidStreamDemo() {
+  const [loading, setLoading] = useState(false);
+  const [streamData, setStreamData] = useState<StreamParams | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const createStream = async (retries = 3, delay = 1000) => {
+    setLoading(true);
+    setError(null);
+
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const res = await fetch("/api/d-id/create-stream", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sourceUrl: "https://d-id-public-bucket.s3.us-west-2.amazonaws.com/alice.jpg",
+          }),
+        });
+        const data = await res.json();
+
+        console.log("Stream data:", data);
+
+        if (!res.ok) {
+          throw new Error(data.error || `Server error (attempt ${attempt})`);
+        }
+
+        setStreamData(data);
+        setLoading(false);
+        return;
+      } catch (error) {
+        console.error(`Attempt ${attempt} failed:`, error);
+        if (attempt === retries) {
+          const err = error instanceof Error ? error.message : "Unknown error";
+          setError(err);
+          setLoading(false);
+        } else {
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+      }
+    }
+  };
+
+  return (
+    <div className="p-4 max-w-xl mx-auto">
+      <button
+        onClick={() => createStream()}
+        disabled={loading}
+        className="bg-blue-600 text-white px-4 py-2 rounded"
+      >
+        {loading ? "Создаем стрим..." : "Создать D-ID стрим"}
+      </button>
+
+      {error && <p className="mt-4 text-red-600">Ошибка: {error}</p>}
+
+      {streamData && <StreamPlayer streamData={streamData} />}
     </div>
   );
 }
+
+// "use client";
+
+// import { useAgentStore } from "@/store";
+// import Image from "next/image";
+// import { useEffect, useState } from "react";
+
+// export default function Avatar() {
+
+//   return (
+//     <div className="space-y-4 max-w-md mx-auto p-4 text-center">
+//       {error && <p className="text-red-500">{error}</p>}
+//       {videoUrl ? (
+//         <video src={videoUrl} controls autoPlay className="w-full rounded shadow-md" />
+//       ) : (
+//         <Image
+//           src="https://d-id-public-bucket.s3.us-west-2.amazonaws.com/alice.jpg"
+//           alt="Agent avatar"
+//           width={300}
+//           height={300}
+//           className="rounded-full mx-auto object-cover shadow"
+//         />
+//       )}
+//     </div>
+//   );
+// }

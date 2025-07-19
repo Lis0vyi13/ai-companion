@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import ChatBox from "./ChatBox";
 import Input from "./ui/Input";
 import { Send } from "lucide-react";
-import { cn } from "@/utils/cn";
 import MicButton from "./MicButton";
 import { useAgentStore } from "@/store";
+import { Button } from "./ui/Button";
+import { cn } from "@/lib/utils";
 
 type MessageType = {
   role: "user" | "system" | "assistant";
@@ -14,9 +15,12 @@ type MessageType = {
 };
 
 const IconAfter = (
-  <div className="bg-secondary min-h-full p-3 text-white rounded-full hover:bg-gray-600 transition">
-    <Send size={22} className="p-0.5" />
-  </div>
+  <Button
+    size="icon"
+    className="h-10 w-10 bg-secondary text-white rounded-full hover:bg-gray-600 transition cursor-pointer"
+  >
+    <Send size={22} className="text-gray-300" />
+  </Button>
 );
 
 export default function Chat() {
@@ -71,7 +75,7 @@ export default function Chat() {
         className={cn(
           "py-4",
           !hasMessages &&
-            "my-auto min-h-full gap-6 -mt-[7rem] flex flex-col flex-1 justify-center items-center",
+            "my-auto min-h-full gap-6 -mt-[12rem] flex flex-col flex-1 justify-center items-center",
         )}
       >
         {!hasMessages && (
@@ -84,7 +88,7 @@ export default function Chat() {
           name="chatInput"
           ref={inputRef}
           onSend={handleUserInput}
-          iconBefore={<MicButton onTranscript={handleUserInput} />}
+          iconBefore={<MicButton className="ml-0.5" onTranscript={handleUserInput} />}
           iconAfter={IconAfter}
           disabled={loading}
           placeholder="Type your message..."

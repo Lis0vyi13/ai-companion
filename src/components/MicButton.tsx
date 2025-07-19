@@ -2,9 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Mic, MicOff } from "lucide-react";
+import { Button } from "./ui/Button";
+import { cn } from "@/lib/utils";
 
 interface MicButtonProps {
   onTranscript: (text: string) => void;
+  className?: string;
 }
 
 interface SpeechRecognition extends EventTarget {
@@ -44,7 +47,7 @@ interface ExtendedWindow extends Window {
   webkitSpeechRecognition?: SpeechRecognitionConstructor;
 }
 
-export default function MicButton({ onTranscript }: MicButtonProps) {
+export default function MicButton({ onTranscript, className }: MicButtonProps) {
   const [listening, setListening] = useState<boolean>(false);
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -59,7 +62,7 @@ export default function MicButton({ onTranscript }: MicButtonProps) {
         extendedWindow.SpeechRecognition || extendedWindow.webkitSpeechRecognition;
 
       if (!SpeechRecognitionAPI) {
-        console.warn("SpeechRecognition не підтримується в цьому браузері");
+        console.warn("SpeechRecognition is not supported in this browser");
         return;
       }
 
@@ -105,14 +108,16 @@ export default function MicButton({ onTranscript }: MicButtonProps) {
 
   return (
     <div className="flex flex-col items-center">
-      <button
+      <Button
+        variant={listening ? "destructive" : "secondary"}
         onClick={toggleRecording}
-        className={`flex items-center cursor-pointer gap-2 px-3 py-3 rounded-full text-white text-sm font-semibold transition ${
-          listening ? "bg-red-600" : "bg-blue-600 hover:bg-blue-700"
-        }`}
+        className={cn(
+          "rounded-full w-10 h-10 flex items-center justify-center cursor-pointer",
+          className,
+        )}
       >
-        {listening ? <MicOff size={18} /> : <Mic size={18} />}
-      </button>
+        {listening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5 text-white" />}
+      </Button>
     </div>
   );
 }

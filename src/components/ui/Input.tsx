@@ -56,6 +56,14 @@ export default function Input({
           {iconBefore}
         </Icon>
       )}
+      {iconAfter && (
+        <Icon
+          className="absolute text-icon right-0 top-1/2 transform -translate-y-1/2"
+          onClick={handleSubmit}
+        >
+          {iconAfter}
+        </Icon>
+      )}
       <input
         {...props}
         type="text"
@@ -67,14 +75,6 @@ export default function Input({
         placeholder={placeholder}
         className={cn(baseInputStyles, paddingStyles)}
       />
-      {iconAfter && (
-        <Icon
-          className="absolute text-icon right-0 top-1/2 transform -translate-y-1/2 cursor-pointer"
-          onClick={handleSubmit}
-        >
-          {iconAfter}
-        </Icon>
-      )}
     </div>
   );
 }

@@ -12,7 +12,7 @@ export default function Icon({ children, onClick, className }: IconProps) {
   return (
     <span
       onClick={onClick}
-      className={`inline-flex cursor-pointer items-center justify-center transition rounded-full p-[1px] hover:bg-gray-200 ${className}`}
+      className={`inline-flex cursor-pointer items-center justify-center transition rounded-full p-[1px] hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
       {children}
     </span>

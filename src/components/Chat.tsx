@@ -3,26 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import ChatBox from "./ChatBox";
 import Input from "./ui/Input";
-import { Send } from "lucide-react";
-import MicButton from "./MicButton";
+import MicButton from "./ui/MicButton";
 import { useAgentStore, useAssistantMessages, useStreamStore } from "@/store";
-import { Button } from "./ui/Button";
 import { cn } from "@/lib/utils";
+import SendButton from "./ui/SendButton";
 
 export type Message = {
   role: "user" | "system" | "assistant";
   content: string;
   created_at: string;
 };
-
-const IconAfter = (
-  <Button
-    size="icon"
-    className="h-10 w-10 bg-secondary text-white rounded-full hover:bg-gray-600 transition cursor-pointer"
-  >
-    <Send size={22} className="text-gray-300" />
-  </Button>
-);
 
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -109,7 +99,7 @@ export default function Chat() {
           ref={inputRef}
           onSend={handleUserInput}
           iconBefore={<MicButton className="ml-0.5" onTranscript={handleUserInput} />}
-          iconAfter={IconAfter}
+          iconAfter={<SendButton />}
           disabled={loading || streamData === null}
           placeholder="Type your message..."
         />

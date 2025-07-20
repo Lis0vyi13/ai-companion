@@ -1,12 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useAgentStore, useStreamStore } from "@/store";
 import { StreamPlayer } from "./StreamPlayer";
+import { Button } from "./ui/Button";
 
 export default function Avatar() {
   const [error, setError] = useState<string | null>(null);
   const streamData = useStreamStore((state) => state.streamData);
+  const [streaming, setStreaming] = useState(false);
   const setStreamData = useStreamStore((state) => state.setStreamData);
   const setAgentData = useAgentStore((state) => state.setAgentData);
 
@@ -14,6 +16,7 @@ export default function Avatar() {
     setError(null);
 
     try {
+      setStreaming(true);
       const chatRes = await fetch("/api/d-id/create-chat/v2_agt_QptPA_iB", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -43,14 +46,24 @@ export default function Avatar() {
     }
   }, [setAgentData, setStreamData]);
 
-  useEffect(() => {
-    createStream();
-  }, [createStream]);
-
   return (
     <div className="p-4 max-w-xl mx-auto">
       {error && <p className="mt-4 text-red-600">Error: {error}</p>}
-      <StreamPlayer streamData={streamData} />
+      {streaming ? (
+        <StreamPlayer streamData={streamData} />
+      ) : (
+        <div className="mt-4 w-[360px] h-[360px] relative">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full z-10">
+            <Button
+              variant="outline"
+              className="cursor-pointer hover:bg-gray-300 transition duration-300"
+              onClick={createStream}
+            >
+              Start AI Stream
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

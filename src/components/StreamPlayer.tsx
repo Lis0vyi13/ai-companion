@@ -47,7 +47,7 @@ export const StreamPlayer = ({ streamData }: { streamData: StreamParams | null }
   }, [remoteStream]);
 
   return (
-    <div className="mt-4 w-[380px] h-[380px] relative">
+    <div className="mt-4 w-[360px] h-[360px] relative">
       {(isLoading || !streamData) && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full z-10">
           <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
@@ -58,7 +58,6 @@ export const StreamPlayer = ({ streamData }: { streamData: StreamParams | null }
         autoPlay
         playsInline
         loop
-        muted
         onError={(e) => console.error("Video error:", e)}
         className="shadow object-cover w-full h-full rounded-full"
       />

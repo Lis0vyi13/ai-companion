@@ -23,26 +23,28 @@ export const StreamPlayer = ({ streamData }: { streamData: StreamParams }) => {
     const video = videoRef.current;
     if (!remoteStream || !video) return;
 
-    if (video.srcObject !== remoteStream) {
-      video.srcObject = remoteStream;
-    }
+    video.srcObject = remoteStream;
 
     const playVideo = async () => {
       try {
         await video.play();
       } catch (err) {
-        console.error("Error playing video:", err);
+        console.error("🚫 Не вдалось відтворити відео:", err);
       }
     };
 
     if (video.readyState >= 2) {
       playVideo();
     } else {
-      video.onloadedmetadata = playVideo;
+      video.onloadedmetadata = () => {
+        playVideo();
+      };
     }
 
     return () => {
+      video.onloadedmetadata = null;
       video.pause();
+      video.srcObject = null;
     };
   }, [remoteStream]);
 
@@ -54,8 +56,8 @@ export const StreamPlayer = ({ streamData }: { streamData: StreamParams }) => {
         ref={videoRef}
         autoPlay
         playsInline
-        loop
         muted
+        loop
         onError={(e) => console.error("Video error:", e)}
         className="rounded shadow object-cover w-full h-full"
       />

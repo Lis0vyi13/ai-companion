@@ -20,8 +20,16 @@ export function useDIDStream({ offer, id, session_id, ice_servers }: StreamParam
 
       pc.ontrack = (event: RTCTrackEvent) => {
         if (!isMounted || !event.streams[0]) return;
-        console.log("📡 onTrack event:", event.streams);
-        setRemoteStream(event.streams[0]);
+
+        const stream = event.streams[0];
+        const videoTracks = stream.getVideoTracks();
+
+        if (videoTracks.length === 0) {
+          console.warn("⚠️ Потік не має відео-треків!");
+        } else {
+          const filteredStream = new MediaStream([videoTracks[0]]);
+          setRemoteStream(filteredStream);
+        }
       };
 
       try {

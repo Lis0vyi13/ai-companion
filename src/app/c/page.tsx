@@ -6,7 +6,7 @@ export default function Home() {
     <main className="relative min-h-screen h-dvh overflow-hidden">
       <div className="absolute inset-0 backdrop-filter-[blur(120px)_saturate(60%)] flex flex-col items-center">
         <Avatar />
-        <div className="absolute top-[380px] inset-0 backdrop-filter-[blur(120px)_saturate(60%)] flex flex-col items-center justify-center">
+        <div className="absolute top-[415px] inset-0 backdrop-filter-[blur(120px)_saturate(60%)] flex flex-col items-center justify-center">
           <Chat />
         </div>
       </div>

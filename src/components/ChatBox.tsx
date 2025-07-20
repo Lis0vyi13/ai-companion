@@ -40,7 +40,7 @@ export default function ChatBox({ messages, loading }: ChatBoxProps) {
 
       {loading && (
         <div className="text-left">
-          <Loader2 className="animate-spin text-gray-400" size={20} />
+          <Loader2 className="animate-spin text-gray-300" size={20} />
         </div>
       )}
 

@@ -9,19 +9,22 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { stream_id, answer, session_id } = body;
+    const { agent_id, stream_id, answer, session_id } = body;
 
-    const response = await fetch(`https://api.d-id.com/talks/streams/${stream_id}/sdp`, {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${apiKey}`,
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `https://api.d-id.com/agents/${agent_id}/streams/${stream_id}/sdp`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          answer,
+          session_id,
+        }),
       },
-      body: JSON.stringify({
-        answer,
-        session_id,
-      }),
-    });
+    );
 
     const data = await response.json();
 

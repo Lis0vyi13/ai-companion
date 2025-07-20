@@ -5,13 +5,14 @@ import ChatBox from "./ChatBox";
 import Input from "./ui/Input";
 import { Send } from "lucide-react";
 import MicButton from "./MicButton";
-import { useAgentStore } from "@/store";
+import { useAgentStore, useAssistantMessages, useStreamStore } from "@/store";
 import { Button } from "./ui/Button";
 import { cn } from "@/lib/utils";
 
-type MessageType = {
+export type Message = {
   role: "user" | "system" | "assistant";
   content: string;
+  created_at: string;
 };
 
 const IconAfter = (
@@ -24,10 +25,11 @@ const IconAfter = (
 );
 
 export default function Chat() {
-  const [messages, setMessages] = useState<MessageType[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-
-  const setAvatarText = useAgentStore((state) => state.setAvatarText);
+  const agentData = useAgentStore((state) => state.agentData);
+  const streamData = useStreamStore((state) => state.streamData);
+  const assistantMessages = useAssistantMessages((state) => state.messages);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const hasMessages = messages.length > 0;
@@ -39,20 +41,32 @@ export default function Chat() {
   const handleUserInput = async (text: string) => {
     if (!text.trim()) return;
     try {
+      if (!streamData || !agentData) {
+        console.error("Stream data is not available");
+        return;
+      }
+
       setLoading(true);
-      const updated: MessageType[] = [...messages, { role: "user", content: text }];
+      const updated: Message[] = [
+        ...messages,
+        { role: "user", content: text, created_at: new Date().toISOString() },
+      ];
       setMessages(updated);
 
-      const res = await fetch("/api/chat", {
+      const response = await fetch("/api/d-id/send-message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: updated }),
+        body: JSON.stringify({
+          streamId: streamData?.id,
+          message: text,
+          sessionId: streamData?.session_id,
+          agent_id: agentData?.agent_id,
+          chat_id: agentData?.id,
+        }),
       });
 
-      const data = await res.json();
-      if (data.reply) {
-        setMessages([...updated, { role: "assistant", content: data.reply }]);
-        setAvatarText(data.reply);
+      if (!response.ok) {
+        throw new Error("Failed to send message");
       }
     } catch (error) {
       console.error("API error:", error);
@@ -63,6 +77,12 @@ export default function Chat() {
       }, 10);
     }
   };
+
+  useEffect(() => {
+    if (!assistantMessages || assistantMessages.length === 0) return;
+    setMessages((prev) => [...prev, assistantMessages[assistantMessages.length - 1]]);
+    useAssistantMessages.getState().clearMessages();
+  }, [assistantMessages]);
 
   return (
     <div className="flex flex-col max-w-4xl w-full h-full justify-center">

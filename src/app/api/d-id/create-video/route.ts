@@ -2,17 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 const apiKey = process.env.D_ID_API_KEY;
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: NextRequest) {
   if (!apiKey) {
     return NextResponse.json({ error: "D-ID API key not set" }, { status: 500 });
   }
 
   try {
     const body = await req.json();
-    const { session_id } = body;
-    const { id } = await params;
+    const { session_id, stream_id, agent_id } = body;
 
-    const response = await fetch(`https://api.d-id.com/talks/streams/${id}`, {
+    const response = await fetch(`https://api.d-id.com/agents/${agent_id}/streams/${stream_id}`, {
       method: "POST",
       headers: {
         Authorization: `Basic ${apiKey}`,
@@ -22,11 +21,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         script: {
           type: "text",
           provider: { type: "microsoft", voice_id: "Sara" },
-          input: "why you are so beautiful",
+          input: "Hello i'm your AI companion. How can I assist you today?",
         },
         audio_optimization: "2",
         session_id,
         driver_url: "bank://lively",
+        nui: true,
       }),
     });
 

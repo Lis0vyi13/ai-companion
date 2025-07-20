@@ -110,7 +110,7 @@ export default function Chat() {
           onSend={handleUserInput}
           iconBefore={<MicButton className="ml-0.5" onTranscript={handleUserInput} />}
           iconAfter={IconAfter}
-          disabled={loading}
+          disabled={loading || streamData === null}
           placeholder="Type your message..."
         />
       </div>

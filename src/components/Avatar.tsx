@@ -56,10 +56,10 @@ export default function Avatar() {
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full z-10">
             <Button
               variant="outline"
-              className="cursor-pointer hover:bg-gray-300 transition duration-300"
+              className="cursor-pointer hover:bg-gray-300 transition duration-300 capitalize"
               onClick={createStream}
             >
-              Start AI Stream
+              Start conversation
             </Button>
           </div>
         </div>
